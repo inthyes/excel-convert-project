@@ -1,7 +1,5 @@
-// convert.mjs
-
-import * as XLSX from "xlsx";
-import fs from "fs";
+const XLSX = require("xlsx");
+const fs = require("fs");
 
 const downloadExcel = (data) => {
   const worksheet = XLSX.utils.json_to_sheet(data);
