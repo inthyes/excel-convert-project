@@ -1,9 +1,10 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
 class SheetDownloader {
   constructor(apiClient) {
     this.apiClient = apiClient;
+    this.headerRow = null;
   }
 
   async downloadToJson(spreadsheetId, sheetName, filePath = null) {
@@ -14,16 +15,16 @@ class SheetDownloader {
 
     const rows = res.data.values;
     if (rows.length === 0) {
-      const message = 'No data found on the sheet';
+      const message = "No data found on the sheet";
       console.error(message);
       return {};
     }
 
+    this.headerRow = rows[0]; // headerRow 값을 할당합니다.
+
     const object = this._rowsToObject(rows);
 
     if (filePath) {
-      // 마지막 인수는 space를 의미합니다. 이곳에 2를 넣으면
-      // 출력되는 JSON 문자열에 2칸 들여쓰기와 줄바꿈이 적용되어 보기 편해집니다.
       const jsonText = JSON.stringify(object, null, 2);
 
       const directory = path.dirname(filePath);
@@ -37,8 +38,9 @@ class SheetDownloader {
   }
 
   _rowsToObject(rows) {
-    const headerRow = rows.slice(0, 1)[0];
+    const headerRow = this.headerRow;
     const dataRows = rows.slice(1, rows.length);
+    console.log("1", headerRow);
 
     return dataRows.map((row) => {
       const item = {};
@@ -49,6 +51,10 @@ class SheetDownloader {
       }
       return item;
     });
+  }
+
+  getHeaderRow() {
+    return this.headerRow;
   }
 }
 

@@ -9,24 +9,10 @@ async function launchServer() {
   app.get("/", (req, res) => {
     res.json({ message: "hello" });
   });
-  // try {
-  //   await sequelize.sync();
-  //   console.log("Database is ready!");
-  // } catch (error) {
-  //   console.log("Unable to connect to the database");
-  //   console.log(error);
-  //   process.exit(1);
 
-  // app.get("/global-stats", globalStatController.getAll);
-  // app.post("/global-stats", globalStatController.insertOrUpdate);
-  // app.delete("/global-stats", globalStatController.remove);
-
-  // app.get("/key-value", keyValueController.get);
-  // app.post("/key-value", keyValueController.insertOrUpdate);
-  // app.delete("/key-value", keyValueController.remove);
-
-  app.get("/excel-to-json", controller.downloadBistro);
-  app.get("/json-to-excel", controller.downloadExcelController);
+  app.get("/excelToJson", controller.excelToJson);
+  app.get("/json-to-excel", controller.downloadExcel);
+  app.get("/getSheetList", controller.getSheetList);
 
   const server = app.listen(8080, () => {
     const host = server.address().address;
