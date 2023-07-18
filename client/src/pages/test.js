@@ -1,70 +1,166 @@
-import React from "react"
-import "bootstrap/dist/css/bootstrap.min.css"
-import { Container } from "react-bootstrap"
-import { Chart } from "react-google-charts" // 임포트
+import React, { useEffect, useState } from "react"
+import axios from "axios"
+import { withStyles, makeStyles } from "@material-ui/core/styles"
+import Paper from "@material-ui/core/Paper"
+import Table from "@material-ui/core/Table"
+import TableBody from "@material-ui/core/TableBody"
+import TableCell from "@material-ui/core/TableCell"
+import TableContainer from "@material-ui/core/TableContainer"
+import TableHead from "@material-ui/core/TableHead"
+import TableRow from "@material-ui/core/TableRow"
+import Select from "@material-ui/core/Select"
+import MenuItem from "@material-ui/core/MenuItem"
+import IconButton from "@material-ui/core/IconButton"
+import DeleteIcon from "@material-ui/icons/Delete"
 
-export default function GoogleTableChart() {
-  // 각 열에 표시되는 자료형, 제목 명시
-  const header = [
-    { type: "string", label: "지역" },
-    { type: "number", label: "확진자" },
-    { type: "number", label: "사망자" },
-    { type: "number", label: "격리해제" },
-    { type: "number", label: "치명률" },
-  ]
+const StyledTableCell = withStyles(theme => ({
+  head: {
+    backgroundColor: theme.palette.grey[200],
+    color: theme.palette.common.white,
+    position: "relative",
+  },
+  body: {
+    fontSize: 14,
+  },
+}))(TableCell)
 
-  const rows = [
-    ["서울", 22717, 277, 17487],
-    ["경기", 18378, 393, 14538],
-    ["대구", 8176, 206, 7787],
-  ]
+const useStyles = makeStyles(theme => ({
+  table: {
+    minWidth: 700,
+  },
+  select: {
+    width: "100%",
+    color: "black",
+  },
+  deleteButton: {
+    position: "absolute",
+    top: "50%",
+    right: theme.spacing(-1),
+    transform: "translateY(-50%)",
+    visibility: "hidden",
+  },
+  headerCell: {
+    "&:hover $deleteButton": {
+      visibility: "visible",
+    },
+  },
+}))
 
-  const fatalityRateAddedRows = rows.map(row => {
-    const [region, confirmed, death, released] = row
-    const fatalityRate = (death / confirmed) * 100
+const MyComponent = () => {
+  const classes = useStyles()
+  const [jsonData, setJsonData] = useState(null)
+  const [selectedHeaders, setSelectedHeaders] = useState([])
+  const [originalHeaders, setOriginalHeaders] = useState([])
 
-    const confirmedFormatted = {
-      v: confirmed,
-      f: `${confirmed}<br><span class ="text-danger">(+101)</span>`,
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("http://localhost:8080/excelToJson")
+        setJsonData(response.data)
+
+        // 동적으로 헤더 설정
+        if (response.data.length > 0) {
+          const headers = Object.keys(response.data[0])
+          setSelectedHeaders(headers)
+          setOriginalHeaders(headers)
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error)
+      }
     }
 
-    const releasedFormatted = {
-      v: released,
-      f: `${confirmed}<br><span class ="text-success">(+30)</span>`,
-    }
+    fetchData()
+  }, [])
 
-    const fatalityRateFormatted = {
-      //* 치명률 값 toFixed(n)활용하여 구현
-      v: fatalityRate,
-      f: `${fatalityRate.toFixed(1)}%`,
-    }
+  const handleHeaderChange = (e, index) => {
+    const newHeaders = [...selectedHeaders]
+    newHeaders[index] = e.target.value
+    setSelectedHeaders(newHeaders)
+  }
 
-    return [
-      region,
-      confirmedFormatted,
-      death,
-      releasedFormatted,
-      fatalityRateFormatted,
-    ]
-  })
-  const data = [
-    header, // 데이터의 첫 번째 요소는 헤더 정보
-    ...fatalityRateAddedRows,
+  const handleDeleteColumn = header => {
+    const updatedData = jsonData.map(item => {
+      const updatedItem = { ...item }
+      delete updatedItem[header]
+      return updatedItem
+    })
+    setJsonData(updatedData)
+  }
+
+  const selectOptions = [
+    "",
+    "메뉴코드",
+    "메뉴명",
+    "가격",
+    "할인가격",
+    "포장추가비용",
+    "이미지명",
+    "메뉴 표시명(한글)",
+    "메뉴 표시명(영문)",
+    "메뉴 표시명(일문)",
+    "메뉴 표시명(중문)",
+    "메뉴 표시명(KDS)",
+    "메뉴 표시명(Print)",
+    "Delete",
   ]
 
   return (
-    <Container>
-      <Chart
-        chartType="Table"
-        loader={<div>로딩중</div>} // 테이블이 로딩되는 동안 보여줄 요소
-        data={data}
-        options={{
-          showRowNumber: true, // 행 번호를 표시하는 열 추가
-          allowHtml: true, // 데이터에 HTML 태그가 존재하는 것을 허용
-          width: "100%",
-          height: "100%",
-        }}
-      />
-    </Container>
+    <div>
+      <h1>Product List</h1>
+      {jsonData ? (
+        <div>
+          <TableContainer component={Paper}>
+            <Table className={classes.table}>
+              <TableHead>
+                <TableRow>
+                  {originalHeaders.map((header, index) => (
+                    <StyledTableCell
+                      key={header}
+                      className={classes.headerCell}
+                    >
+                      <Select
+                        className={classes.select}
+                        value={selectedHeaders[index]}
+                        onChange={e => handleHeaderChange(e, index)}
+                      >
+                        <MenuItem value={header}>{header}</MenuItem>
+                        {selectOptions.map(option => (
+                          <MenuItem value={option} key={option}>
+                            {option}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      {header !== "" && (
+                        <IconButton
+                          className={classes.deleteButton}
+                          onClick={() => handleDeleteColumn(header)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      )}
+                    </StyledTableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {jsonData.map((product, index) => (
+                  <TableRow key={index}>
+                    {originalHeaders.map(header => (
+                      <TableCell key={`${header}-${index}`}>
+                        {product[header]}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </div>
+      ) : (
+        <div>Loading...</div>
+      )}
+    </div>
   )
 }
+
+export default MyComponent

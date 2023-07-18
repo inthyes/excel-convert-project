@@ -1,9 +1,12 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const controller = require("./controller/convert.controller");
+const cors = require("cors");
 
 async function launchServer() {
   const app = express();
+
+  app.use(cors());
 
   app.use(bodyParser.json());
   app.get("/", (req, res) => {
