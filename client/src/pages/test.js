@@ -84,7 +84,12 @@ const MyComponent = () => {
       delete updatedItem[header]
       return updatedItem
     })
+
+    const updatedHeaders = selectedHeaders.filter(h => h !== header)
+
     setJsonData(updatedData)
+    setSelectedHeaders(updatedHeaders)
+    setOriginalHeaders(updatedHeaders)
   }
 
   const selectOptions = [
@@ -101,8 +106,9 @@ const MyComponent = () => {
     "메뉴 표시명(중문)",
     "메뉴 표시명(KDS)",
     "메뉴 표시명(Print)",
-    "Delete",
   ]
+
+  console.log(jsonData)
 
   return (
     <div>
