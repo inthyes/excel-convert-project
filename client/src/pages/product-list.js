@@ -92,6 +92,35 @@ const MyComponent = () => {
     setOriginalHeaders(updatedHeaders)
   }
 
+  const handleDownloadData = () => {
+    // 셀렉트 박스로 변경된 헤더 이름을 반영한 JSON 데이터 생성
+    const updatedJsonData = jsonData.map(item => {
+      const updatedItem = {}
+      originalHeaders.forEach((header, index) => {
+        const selectedHeader = selectedHeaders[index]
+        updatedItem[selectedHeader] = item[header]
+      })
+      return updatedItem
+    })
+
+    // Send updatedJsonData to the backend
+    axios
+      .post("http://localhost:8080/excelTojson", updatedJsonData)
+      .then(response => {
+        console.log("Data sent successfully:", response.data)
+        // Perform any additional actions if needed
+      })
+      .catch(error => {
+        console.error("Error sending data:", error)
+      })
+  }
+
+  const handleResetData = () => {
+    setJsonData(null)
+    setSelectedHeaders([])
+    setOriginalHeaders([])
+  }
+
   const selectOptions = [
     "",
     "메뉴코드",
@@ -113,6 +142,8 @@ const MyComponent = () => {
   return (
     <div>
       <h1>Product List</h1>
+      {/* <button onClick={handleResetData}>Reset Data</button> */}
+      <button onClick={handleDownloadData}>Download Data</button>
       {jsonData ? (
         <div>
           <TableContainer component={Paper}>

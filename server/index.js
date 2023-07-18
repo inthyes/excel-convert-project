@@ -16,7 +16,7 @@ async function launchServer() {
   app.get("/excelToJson", controller.excelToJson);
   app.get("/json-to-excel", controller.downloadExcel);
   app.get("/getSheetList", controller.getSheetList);
-
+  app.post("/excelToJson", controller.postJson);
   const server = app.listen(8080, () => {
     const host = server.address().address;
     const port = server.address().port;
