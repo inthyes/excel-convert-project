@@ -1,11 +1,13 @@
+import "bootstrap/dist/css/bootstrap.min.css"
 import React from "react"
-import { menuTable } from "../components/menu-table"
+// import { css } from "@emotion/react"
+
+import { Top } from "../components/top"
 
 export default function Home() {
   return (
     <div>
-      Hello world!
-      {/* <menuTable /> */}
+      <Top />
     </div>
   )
 }

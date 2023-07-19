@@ -13,10 +13,12 @@ async function launchServer() {
     res.json({ message: "hello" });
   });
 
-  app.get("/excelToJson", controller.excelToJson);
-  app.get("/json-to-excel", controller.downloadExcel);
+  app.get("/excelToJson/", controller.excelToJson);
+  app.get("/jsontoexcel", controller.downloadExcel);
   app.get("/getSheetList", controller.getSheetList);
   app.post("/excelToJson", controller.postJson);
+  app.post("/getSheetList", controller.postSheetName);
+
   const server = app.listen(8080, () => {
     const host = server.address().address;
     const port = server.address().port;

@@ -2,6 +2,7 @@ const SheetApiClientFactory = require("../sheet_api_client_factory");
 const SheetDownloader = require("../sheet_downloader");
 const XLSX = require("xlsx");
 const fs = require("fs");
+const { json } = require("express");
 const spreadsheetId = "10SSTLhZzmHEABvoe4Isy6L258tk4T7GN8YdylUawLB4";
 
 async function getSheetList(req, res) {
@@ -22,12 +23,14 @@ async function getSheetList(req, res) {
 
 async function excelToJson(req, res) {
   try {
+    // const { item } = req.body;
+    // console.log(item);
     const sheetApiClient = await SheetApiClientFactory.create();
     const downloader = new SheetDownloader(sheetApiClient);
 
     const fileInfo = await downloader.downloadToJson(
       spreadsheetId,
-      "product_list",
+      "asian",
       "downloaded/product_list.json"
     );
 
@@ -74,9 +77,16 @@ function postJson(req, res) {
   res.json({ message: "Data received successfully", jsonData });
 }
 
+function postSheetName(req, res) {
+  const jsonData = req.body;
+  console.log(jsonData);
+  res.json({ message: "Data received successfully", jsonData });
+}
+
 module.exports = {
   excelToJson,
   downloadExcel,
   getSheetList, // 추가: 시트 목록을 가져오는 함수
   postJson,
+  postSheetName,
 };
