@@ -13,11 +13,19 @@ async function launchServer() {
     res.json({ message: "hello" });
   });
 
-  app.get("/excelToJson/", controller.excelToJson);
-  app.get("/jsontoexcel", controller.downloadExcel);
+  // sheetList출력 및 선택
   app.get("/getSheetList", controller.getSheetList);
-  app.post("/excelToJson", controller.postJson);
-  app.post("/getSheetList", controller.postSheetName);
+
+  // sheetList name을 불러온다.
+  app.post("/postSheetName", controller.postSheetName);
+
+  // product-list/{item}에 json을 표로 출력
+  app.get("/getJson/", controller.getJson);
+
+  // product-list/{item} excel로 저장
+  app.get("/downloadExcel", controller.downloadExcel);
+
+  app.post("/postJson", controller.postJson);
 
   const server = app.listen(8080, () => {
     const host = server.address().address;
