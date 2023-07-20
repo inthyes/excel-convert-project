@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react"
 import axios from "axios"
 import { Link } from "react-router-dom"
-import { useItemContext } from "../itemContext"
+// import { useItemContext } from "../itemContext"
 
 function SheetList() {
   const [sheetList, setSheetList] = useState([])
-  const { setItem } = useItemContext()
+  // const { setItem } = useItemContext()
 
   useEffect(() => {
     axios
@@ -19,18 +19,18 @@ function SheetList() {
       })
   }, [])
 
-  const handleSheetList = item => {
-    axios
-      .post("http://localhost:8080/postSheetName", { item: item })
-      .then(response => {
-        console.log("Sheet name sent successfully:", response.data)
-        // Perform any additional actions if needed
+  const handleSheetList = async item => {
+    try {
+      console.log("asdfasdfaSDF", item)
+      const response = await axios.post("http://localhost:8080/postSheetName", {
+        item: item,
       })
-      .catch(error => {
-        console.error("Error sending sheet name:", error)
-      })
+      console.log("Sheet name sent successfully:", response.data)
 
-    setItem(item)
+      // Perform any additional actions if needed
+    } catch (error) {
+      console.error("Error sending sheet name:", error)
+    }
     window.location.href = `/product-list/${item}`
   }
 

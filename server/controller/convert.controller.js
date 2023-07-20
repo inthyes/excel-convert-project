@@ -22,33 +22,30 @@ async function getSheetList(req, res) {
     res.status(500).json({ error: "Internal Server Error" });
   }
 }
-
-//*
 function postSheetName(req, res) {
   const { item } = req.body;
   console.log("Received item :", item);
+  // Send the item as a response
   res.json({ message: "Data received successfully", item });
-  return item;
 }
 
-//* 각각의 json에 맞게 table을 product-list/{item}시작과 동시에 get되는 함수
+// Function to get the JSON data
 async function getJson(req, res) {
   try {
-    // const item = postSheetName(req, res); // Call postSheetName and get the returned item
+    // Call the postSheetName function and get the returned item
+    // const postResponse = await postSheetName(req, res);
+    // const item = postResponse.item;
     // console.log("Received item in getJson:", item);
 
+    // Continue with your existing code here
     const sheetApiClient = await SheetApiClientFactory.create();
     const downloader = new SheetDownloader(sheetApiClient);
-
     const fileInfo = await downloader.downloadToJson(
       spreadsheetId,
       "asian",
-      // item,
       "downloaded/product_list.json"
     );
-
     const headerRow = downloader.getHeaderRow();
-    // console.log("Header Row:", headerRow);
 
     res.json(fileInfo);
   } catch (error) {

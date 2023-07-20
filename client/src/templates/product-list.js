@@ -54,17 +54,15 @@ const MyComponent = () => {
   const [selectedHeaders, setSelectedHeaders] = useState([])
   const [originalHeaders, setOriginalHeaders] = useState([])
 
-  const { item } = useItemContext()
-  console.log("your item :", item)
+  // const { item } = useItemContext()
+  // console.log("your item :", item)
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         // templates/product-list.js에서 item 값을 사용할 수 있도록 전달
-        console.log("item from context:", item)
-        const response = await axios.get("http://localhost:8080/getJson", {
-          params: { item }, // 전달받은 item 값을 서버에 전달
-        })
+        // console.log("item from context:", item)
+        const response = await axios.get("http://localhost:8080/getJson")
         setJsonData(response.data)
         console.log("jsonData:", response.data)
 
@@ -80,7 +78,7 @@ const MyComponent = () => {
     }
 
     fetchData()
-  }, [item]) // item 값이 변경될 때마다 useEffect가 호출되도록 변경
+  }, []) // item 값이 변경될 때마다 useEffect가 호출되도록 변경
 
   const handleHeaderChange = (e, index) => {
     const newHeaders = [...selectedHeaders]
@@ -115,7 +113,7 @@ const MyComponent = () => {
 
     // Send updatedJsonData to the backend
     axios
-      .post("http://localhost:8080/excelTojson", updatedJsonData)
+      .post("http://localhost:8080/postJson", updatedJsonData)
       .then(response => {
         console.log("Data sent successfully:", response.data)
         // Perform any additional actions if needed
