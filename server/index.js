@@ -7,7 +7,7 @@ async function launchServer() {
   const app = express();
 
   app.use(cors());
-
+  // app.use(express.static("downloaded"));
   app.use(bodyParser.json());
   app.get("/", (req, res) => {
     res.json({ message: "hello" });

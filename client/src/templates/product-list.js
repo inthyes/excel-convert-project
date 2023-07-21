@@ -53,6 +53,7 @@ const MyComponent = () => {
   const [jsonData, setJsonData] = useState(null)
   const [selectedHeaders, setSelectedHeaders] = useState([])
   const [originalHeaders, setOriginalHeaders] = useState([])
+  const [downloadUrl, setDownloadUrl] = useState("")
 
   // const { item } = useItemContext()
   // console.log("your item :", item)
@@ -116,11 +117,25 @@ const MyComponent = () => {
       .post("http://localhost:8080/postJson", updatedJsonData)
       .then(response => {
         console.log("Data sent successfully:", response.data)
-        // Perform any additional actions if needed
+        // 서버로부터 받아온 다운로드 URL을 상태 변수에 설정
+        setDownloadUrl(response.data.downloadUrl)
       })
       .catch(error => {
         console.error("Error sending data:", error)
       })
+  }
+
+  // 추가: 엑셀 파일 다운로드 함수
+  const handleDownloadExcel = () => {
+    // 파일 다운로드를 위해 엑셀 파일의 URL을 클릭하여 다운로드
+    console.log("Asdfasdf")
+    const link = document.createElement("a")
+    link.href = downloadUrl
+    link.download = "excel_file.xlsx"
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    console.log("handleDownloadExcel", downloadUrl)
   }
 
   const handleResetData = () => {
@@ -150,6 +165,9 @@ const MyComponent = () => {
       <h1>Product List</h1>
       {/* <button onClick={handleResetData}>Reset Data</button> */}
       <button onClick={handleDownloadData}>Download Data</button>
+      {downloadUrl && (
+        <button onClick={handleDownloadExcel}>Download Excel</button>
+      )}
       {jsonData ? (
         <div>
           <TableContainer component={Paper}>

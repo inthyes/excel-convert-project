@@ -40,7 +40,7 @@ class SheetDownloader {
   _rowsToObject(rows) {
     const headerRow = this.headerRow;
     const dataRows = rows.slice(1, rows.length);
-    console.log("1", headerRow);
+    // console.log("1", headerRow);
 
     return dataRows.map((row) => {
       const item = {};
