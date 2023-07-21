@@ -11,9 +11,10 @@ import TableRow from "@material-ui/core/TableRow"
 import Select from "@material-ui/core/Select"
 import MenuItem from "@material-ui/core/MenuItem"
 import IconButton from "@material-ui/core/IconButton"
+// import IconButton from "@material-ui/core/IconButton"
 import DeleteIcon from "@material-ui/icons/Delete"
-
-import { useItemContext } from "../itemContext"
+import Button from "@material-ui/core/Button"
+import Header from "../components/Header"
 
 const StyledTableCell = withStyles(theme => ({
   head: {
@@ -69,7 +70,9 @@ const MyComponent = () => {
 
         // 동적으로 헤더 설정
         if (response.data.length > 0) {
-          const headers = Object.keys(response.data[0])
+          const headers = Object.keys(response.data[0]).filter(
+            header => header.trim() !== ""
+          )
           setSelectedHeaders(headers)
           setOriginalHeaders(headers)
         }
@@ -119,6 +122,7 @@ const MyComponent = () => {
         console.log("Data sent successfully:", response.data)
         // 서버로부터 받아온 다운로드 URL을 상태 변수에 설정
         setDownloadUrl(response.data.downloadUrl)
+        handleDownloadExcel()
       })
       .catch(error => {
         console.error("Error sending data:", error)
@@ -162,12 +166,22 @@ const MyComponent = () => {
 
   return (
     <div>
-      <h1>Product List</h1>
+      <Header></Header>
+      {/* <h1>Product List</h1> */}
       {/* <button onClick={handleResetData}>Reset Data</button> */}
-      <button onClick={handleDownloadData}>Download Data</button>
-      {downloadUrl && (
+      {/* <Button variant="outlined" color="neutral">
+        Outlined
+      </Button> */}
+
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <Button variant="outlined" color="neutral" onClick={handleDownloadData}>
+          Download Data
+        </Button>
+      </div>
+      {/* {downloadUrl && (
         <button onClick={handleDownloadExcel}>Download Excel</button>
-      )}
+      )} */}
+      <br />
       {jsonData ? (
         <div>
           <TableContainer component={Paper}>
