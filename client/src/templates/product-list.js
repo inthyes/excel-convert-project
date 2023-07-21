@@ -142,6 +142,21 @@ const MyComponent = () => {
     console.log("handleDownloadExcel", downloadUrl)
   }
 
+  const handleAddColumn = () => {
+    const newHeader = `New Column ${selectedHeaders.length + 1}`
+
+    setSelectedHeaders(prevHeaders => [...prevHeaders, newHeader])
+    setOriginalHeaders(prevHeaders => [...prevHeaders, newHeader])
+
+    // 새로운 열을 추가한 후, jsonData에도 빈 값을 추가해 줍니다.
+    const updatedData = jsonData.map(item => {
+      const updatedItem = { ...item, [newHeader]: "" }
+      return updatedItem
+    })
+
+    setJsonData(updatedData)
+  }
+
   const handleResetData = () => {
     setJsonData(null)
     setSelectedHeaders([])
@@ -173,9 +188,12 @@ const MyComponent = () => {
         Outlined
       </Button> */}
 
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <Button variant="outlined" color="neutral" onClick={handleDownloadData}>
+      <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+        <Button variant="outlined" color="primary" onClick={handleDownloadData}>
           Download Data
+        </Button>
+        <Button variant="outlined" color="primary" onClick={handleAddColumn}>
+          Add Column
         </Button>
       </div>
       {/* {downloadUrl && (
@@ -221,7 +239,7 @@ const MyComponent = () => {
                 {jsonData.map((product, index) => (
                   <TableRow key={index}>
                     {originalHeaders.map(header => (
-                      <TableCell key={`${header}-${index}`}>
+                      <TableCell key={`${header}-${index}`} align="center">
                         {product[header]}
                       </TableCell>
                     ))}
@@ -232,7 +250,7 @@ const MyComponent = () => {
           </TableContainer>
         </div>
       ) : (
-        <div>Loading...</div>
+        <div style={{ textAlign: "center", fontSize: "24px" }}>Loading...</div>
       )}
     </div>
   )

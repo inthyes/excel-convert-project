@@ -27,11 +27,11 @@ function SheetList() {
       })
       console.log("Sheet name sent successfully:", response.data)
 
-      // Perform any additional actions if needed
+      // 서버로부터 값을 받은 후에 페이지를 이동시킵니다.
+      window.location.href = `/product-list/${item}`
     } catch (error) {
       console.error("Error sending sheet name:", error)
     }
-    window.location.href = `/product-list/${item}`
   }
 
   return (
