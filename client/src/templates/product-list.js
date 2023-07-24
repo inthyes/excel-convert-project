@@ -59,6 +59,12 @@ const MyComponent = () => {
 
   // const { item } = useItemContext()
   // console.log("your item :", item)
+  // useEffect(() => {
+  //   const storedSharedItem = sessionStorage.getItem("sharedItem")
+  //   if (storedSharedItem) {
+  //     setSharedItem(JSON.parse(storedSharedItem))
+  //   }
+  // }, [])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -88,23 +94,33 @@ const MyComponent = () => {
   }, []) // item 값이 변경될 때마다 useEffect가 호출되도록 변경
 
   const handleHeaderChange = (e, index) => {
+    //e: 이벤트 객체, index: 수정하려는 헤더의 인덱스
     const newHeaders = [...selectedHeaders]
-    newHeaders[index] = e.target.value
+    console.log("aaaaaaa", newHeaders)
+    newHeaders[index] = e.target.value //헤더 변경
+    console.log("bbbbbbb", newHeaders)
     setSelectedHeaders(newHeaders)
+    console.log(newHeaders[index], index)
   }
 
   const handleDeleteColumn = header => {
     const updatedData = jsonData.map(item => {
       const updatedItem = { ...item }
       delete updatedItem[header]
+
       return updatedItem
     })
 
+    console.log(["dddddd", ...selectedHeaders])
+    console.log("eeeeeeeee", header)
     const updatedHeaders = selectedHeaders.filter(h => h !== header)
 
+    console.log(updatedHeaders, header) //헤더값 삭제
     setJsonData(updatedData)
+    console.log(updatedData)
     setSelectedHeaders(updatedHeaders)
     setOriginalHeaders(updatedHeaders)
+    console.log(updatedData)
   }
 
   const handleDownloadData = () => {
@@ -124,19 +140,18 @@ const MyComponent = () => {
         console.log("Data sent successfully:", response.data)
         // 서버로부터 받아온 다운로드 URL을 상태 변수에 설정
         setDownloadUrl(response.data.downloadUrl)
-        handleDownloadExcel()
+        handleDownloadExcel(response.data.downloadUrl) // 엑셀 파일 다운로드 함수 호출
       })
       .catch(error => {
         console.error("Error sending data:", error)
       })
   }
 
-  // 추가: 엑셀 파일 다운로드 함수
-  const handleDownloadExcel = () => {
+  const handleDownloadExcel = downloadUrl => {
     // 파일 다운로드를 위해 엑셀 파일의 URL을 클릭하여 다운로드
-    console.log("Asdfasdf")
+
     const link = document.createElement("a")
-    link.href = downloadUrl
+    link.href = downloadUrl // response에서 직접 URL을 가져와서 사용
     link.download = "excel_file.xlsx"
     document.body.appendChild(link)
     link.click()

@@ -61,7 +61,7 @@ async function getJson(req, res) {
   }
 }
 
-//* json을 excel로 변환하는 함수(downloadExcel을 통해 작동)
+//* json을 excel로 변환하는 함수(downloadExcel을 통해 작동) - 사용 안 함
 function jsonToExcel(filePath) {
   const jsonData = fs.readFileSync(filePath, "utf-8");
 
@@ -71,6 +71,19 @@ function jsonToExcel(filePath) {
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, "my_sheet");
   XLSX.writeFile(workbook, "json_to_excel.xlsx");
+}
+
+//* json server에 저장.
+function postJson(req, res) {
+  const filePath = path.join(__dirname, "../downloaded/product_list.json");
+  const jsonData = req.body;
+  // console.log("jsondata", jsonData);
+  console.log("내가먼저");
+
+  fs.writeFileSync(filePath, JSON.stringify(jsonData, null, 2));
+
+  downloadExcel(filePath, res); // res 객체를 downloadExcel 함수에 전달
+  console.log("server filePath:", filePath);
 }
 
 //* json을 excel로 변환 후 저장하는 함수
@@ -91,19 +104,6 @@ function downloadExcel(filePath, res) {
   res.json({
     downloadUrl: `http://localhost:8000/downloaded/${excelFileName}`,
   });
-}
-
-//* json server에 저장.
-function postJson(req, res) {
-  const filePath = path.join(__dirname, "../downloaded/product_list.json");
-  const jsonData = req.body;
-  // console.log("jsondata", jsonData);
-  console.log("내가먼저");
-
-  fs.writeFileSync(filePath, JSON.stringify(jsonData, null, 2));
-
-  downloadExcel(filePath, res); // res 객체를 downloadExcel 함수에 전달
-  console.log("server filePath:", filePath);
 }
 
 module.exports = {
