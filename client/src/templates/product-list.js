@@ -52,6 +52,7 @@ const useStyles = makeStyles(theme => ({
 const MyComponent = () => {
   const classes = useStyles()
   const [jsonData, setJsonData] = useState(null)
+  const [sharedItem, setSharedItem] = useState(null) // sharedItem 상태 추가
   const [selectedHeaders, setSelectedHeaders] = useState([])
   const [originalHeaders, setOriginalHeaders] = useState([])
   const [downloadUrl, setDownloadUrl] = useState("")
@@ -65,12 +66,14 @@ const MyComponent = () => {
         // templates/product-list.js에서 item 값을 사용할 수 있도록 전달
         // console.log("item from context:", item)
         const response = await axios.get("http://localhost:8080/getJson")
-        setJsonData(response.data)
-        console.log("jsonData:", response.data)
+        setJsonData(response.data.fileInfo)
+        console.log("jsonData:", response.data.fileInfo)
+        setSharedItem(response.data.sharedItem)
+        console.log("item?:", response.data.sharedItem)
 
         // 동적으로 헤더 설정
-        if (response.data.length > 0) {
-          const headers = Object.keys(response.data[0]).filter(
+        if (response.data.fileInfo.length > 0) {
+          const headers = Object.keys(response.data.fileInfo[0]).filter(
             header => header.trim() !== ""
           )
           setSelectedHeaders(headers)
@@ -115,7 +118,6 @@ const MyComponent = () => {
       return updatedItem
     })
 
-    // Send updatedJsonData to the backend
     axios
       .post("http://localhost:8080/postJson", updatedJsonData)
       .then(response => {
@@ -148,7 +150,7 @@ const MyComponent = () => {
     setSelectedHeaders(prevHeaders => [...prevHeaders, newHeader])
     setOriginalHeaders(prevHeaders => [...prevHeaders, newHeader])
 
-    // 새로운 열을 추가한 후, jsonData에도 빈 값을 추가해 줍니다.
+    // 새로운 열을 추가한 후, jsonData에도 빈 값을 추가한다.
     const updatedData = jsonData.map(item => {
       const updatedItem = { ...item, [newHeader]: "" }
       return updatedItem
@@ -181,7 +183,7 @@ const MyComponent = () => {
 
   return (
     <div>
-      <Header></Header>
+      <Header sharedItem={sharedItem} />
       {/* <h1>Product List</h1> */}
       {/* <button onClick={handleResetData}>Reset Data</button> */}
       {/* <Button variant="outlined" color="neutral">

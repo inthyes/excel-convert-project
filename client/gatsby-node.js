@@ -1,4 +1,3 @@
-// gatsby-config.js
 const axios = require("axios")
 
 exports.createPages = async ({ graphql, actions }) => {

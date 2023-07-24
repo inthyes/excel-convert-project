@@ -10,13 +10,17 @@ const HeaderCss = css`
   }
 `
 
-const Header = () => {
+const Header = props => {
+  // MyComponent에서 전달받은 jsonData의 item 값을 사용합니다
+  const item = props.sharedItem
+  console.log(item)
+
   return (
     <div css={HeaderCss} className="mb-3">
       <Row>
         <Col md="6" sm="auto" className="text-center m-auto">
           <br />
-          <h1>Product List</h1>
+          <h2>메뉴 리스트 [매장명 : {item}]</h2>
           <p>googleSheet to excelFile</p>
         </Col>
       </Row>
