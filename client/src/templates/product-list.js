@@ -94,33 +94,30 @@ const MyComponent = () => {
   }, []) // item 값이 변경될 때마다 useEffect가 호출되도록 변경
 
   const handleHeaderChange = (e, index) => {
-    //e: 이벤트 객체, index: 수정하려는 헤더의 인덱스
+    // e: 이벤트 객체, index: 수정하려는 헤더의 인덱스
     const newHeaders = [...selectedHeaders]
-    console.log("aaaaaaa", newHeaders)
-    newHeaders[index] = e.target.value //헤더 변경
-    console.log("bbbbbbb", newHeaders)
-    setSelectedHeaders(newHeaders)
-    console.log(newHeaders[index], index)
+    newHeaders[index] = e.target.value // 헤더 변경
+    setSelectedHeaders(newHeaders) // selectedHeaders 배열 업데이트
   }
 
-  const handleDeleteColumn = header => {
+  const handleDeleteColumn = columnIndex => {
     const updatedData = jsonData.map(item => {
       const updatedItem = { ...item }
-      delete updatedItem[header]
-
+      delete updatedItem[selectedHeaders[columnIndex]]
       return updatedItem
     })
 
-    console.log(["dddddd", ...selectedHeaders])
-    console.log("eeeeeeeee", header)
-    const updatedHeaders = selectedHeaders.filter(h => h !== header)
+    const updatedHeaders = selectedHeaders.filter(
+      (_, index) => index !== columnIndex
+    )
 
-    console.log(updatedHeaders, header) //헤더값 삭제
+    const updatedOriginalHeaders = originalHeaders.filter(
+      (_, index) => index !== columnIndex
+    )
+
     setJsonData(updatedData)
-    console.log(updatedData)
-    setSelectedHeaders(updatedHeaders)
-    setOriginalHeaders(updatedHeaders)
-    console.log(updatedData)
+    setSelectedHeaders(updatedHeaders) // selectedHeaders 배열 업데이트
+    setOriginalHeaders(updatedOriginalHeaders) // originalHeaders 배열 업데이트
   }
 
   const handleDownloadData = () => {
@@ -243,7 +240,7 @@ const MyComponent = () => {
                       {header !== "" && (
                         <IconButton
                           className={classes.deleteButton}
-                          onClick={() => handleDeleteColumn(header)}
+                          onClick={() => handleDeleteColumn(index)}
                         >
                           <DeleteIcon />
                         </IconButton>
