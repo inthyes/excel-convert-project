@@ -3,12 +3,16 @@ const SheetDownloader = require("../sheet_downloader");
 const XLSX = require("xlsx");
 const fs = require("fs");
 const path = require("path");
+const dotenv = require("dotenv");
+dotenv.config();
 // const { json } = require("express");
 const spreadsheetId = "10SSTLhZzmHEABvoe4Isy6L258tk4T7GN8YdylUawLB4";
 const fileDirectory = "./downloaded";
 const serverAddress = "http://localhost:8000";
 let sharedItem;
 let sharedItemValue = null;
+const accessKeyId = process.env.AccessKeyId;
+const secretAccessKey = process.env.SecretAccessKey;
 
 //* product-list페이지 시작과 동시에 get되는 함수
 async function getSheetList(req, res) {
@@ -49,7 +53,7 @@ async function getJson(req, res) {
   try {
     console.log("sharedItemValue", sharedItemValue); // sharedItemValue 값 출력
     // const x = req.session.sharedItem;
-    console.log("Received item in getJson:", req.session.sharedItem);
+    // console.log("Received item in getJson:", req.session.sharedItem);
 
     const range = "A1:Z100";
     const sheetApiClient = await SheetApiClientFactory.create();
@@ -115,7 +119,7 @@ function downloadExcel(filePath, res) {
 
   const excelFileName = `json_to_excel.xlsx`;
   const excelFilePath = path.join(fileDirectory, excelFileName);
-  console.log("fileDirectory", fileDirectory);
+  // console.log("fileDirectory", fileDirectory);
   XLSX.writeFile(workbook, excelFilePath);
 
   console.log("변환 완료");
@@ -127,14 +131,67 @@ function downloadExcel(filePath, res) {
   );
   // res.download(excelFilePath); // 파일 다운로드 응답 생성
 
-  console.log("zzzzzzzzz", workbook);
-  console.log("aaaaaaaaaaaaaa", excelFilePath);
-  console.log("qqqqqqqqqqqqq", fileDirectory);
+  // console.log("zzzzzzzzz", workbook);
+  // console.log("aaaaaaaaaaaaaa", excelFilePath);
+  // console.log("qqqqqqqqqqqqq", fileDirectory);
   res.json({
     downloadUrl: `${serverAddress}/downloaded/${excelFileName}`,
   });
 }
 
+// const { S3Client, PutObjectCommand } = require("aws-sdk");
+// const fs = require("fs");
+
+// AWS 인증 정보 설정 (AWS_ACCESS_KEY_ID와 AWS_SECRET_ACCESS_KEY는 환경 변수로 설정하거나 별도의 파일에서 가져와서 사용할 수 있습니다.)
+
+const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
+// const fs = require("fs");
+
+// AWS 인증 정보 설정 (AWS_ACCESS_KEY_ID와 AWS_SECRET_ACCESS_KEY는 환경 변수로 설정하거나 별도의 파일에서 가져와서 사용할 수 있습니다.)
+const credentials = {
+  accessKeyId: accessKeyId,
+  secretAccessKey: secretAccessKey,
+};
+
+// AWS SDK (v3) S3 클라이언트 생성
+const s3Client = new S3Client({ region: "ap-northeast-2", credentials });
+
+// 파일 업로드 함수
+const uploadFileToS3 = async (bucketName, fileName, fileContent) => {
+  try {
+    // S3 업로드 매개변수 설정
+    const params = {
+      Bucket: bucketName, // 업로드할 버킷 이름
+      Key: fileName, // S3에 저장될 파일 이름
+      Body: fileContent, // 업로드할 파일 내용
+    };
+
+    // S3에 파일 업로드
+    const command = new PutObjectCommand(params);
+    const response = await s3Client.send(command);
+
+    console.log(`File uploaded successfully. Location: ${response.Location}`);
+    return response.Location;
+  } catch (error) {
+    console.error("Error uploading file to S3:", error);
+    throw error;
+  }
+};
+
+// 파일을 읽어서 S3에 업로드하는 함수
+const uploadFile = async (bucketName, fileName) => {
+  try {
+    // Read content from the file
+    const fileContent = fs.readFileSync(fileName);
+
+    // 파일 업로드 함수 호출
+    const s3Url = await uploadFileToS3(bucketName, "cat.jpg", fileContent);
+    return s3Url; // 업로드 성공 시 S3 URL을 반환
+  } catch (error) {
+    console.error("Error reading file or uploading to S3:", error);
+    throw error;
+  }
+};
 module.exports = {
   getJson,
   postJson,
@@ -143,4 +200,5 @@ module.exports = {
   jsonToExcel,
   postSheetName,
   setSession,
+  uploadFile, // 추가: 파일 업로드 함수
 };

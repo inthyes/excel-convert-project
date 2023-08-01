@@ -93,7 +93,7 @@ const MyComponent = () => {
     }
 
     fetchData()
-  }, []) // item 값이 변경될 때마다 useEffect가 호출되도록 변경
+  }, [])
 
   const handleHeaderChange = (e, index) => {
     // e: 이벤트 객체, index: 수정하려는 헤더의 인덱스
