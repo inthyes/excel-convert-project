@@ -27,11 +27,12 @@ function SheetList() {
       sessionStorage.setItem("sharedItem", item) // 클라이언트 측의 sessionStorage에 값을 설정
       const response = await axios.post("http://localhost:8080/postSheetName", {
         item: item,
+        sessionData: sessionStorage.getItem("sharedItem"),
       })
       console.log("Sheet name sent successfully:", response.data)
 
-      // 서버로부터 값을 받은 후에 페이지를 이동시킨다.
-      // window.location.href = `/product-list/${item}`
+      // Set the received sharedItem value in sessionStorage
+      // sessionStorage.setItem("sharedItem", response.data.sharedItem)
     } catch (error) {
       console.error("Error sending sheet name:", error)
     }

@@ -11,7 +11,7 @@ const HeaderCss = css`
 `
 
 const Header = React.memo(props => {
-  const item = props.sharedItem
+  const item = props.storedSharedItem
   console.log(item)
 
   return (

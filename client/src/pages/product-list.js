@@ -57,32 +57,27 @@ const MyComponent = () => {
   const [originalHeaders, setOriginalHeaders] = useState([])
   const [downloadUrl, setDownloadUrl] = useState("")
 
-  // const { item } = useItemContext()
-  // console.log("your item :", item)
-  // useEffect(() => {
-  //   const storedSharedItem = sessionStorage.getItem("sharedItem")
-  //   if (storedSharedItem) {
-  //     setSharedItem(JSON.parse(storedSharedItem))
-  //   }
-  // }, [])
-
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // templates/product-list.js에서 item 값을 사용할 수 있도록 전달
-        // console.log("item from context:", item);
-        const response = await axios.get("http://localhost:8080/getJson")
+        // 이 부분을 수정하여 세션 스토리지에서 sharedItem 값을 가져옴
+        const storedSharedItem = sessionStorage.getItem("sharedItem")
+        console.log("Asdf", storedSharedItem)
+
+        if (storedSharedItem) {
+          const response = await axios.post(
+            "http://localhost:8080/setSession",
+            {
+              sharedItem: storedSharedItem,
+            }
+          )
+          console.log("Session value set on server:", response.data)
+        }
+        setSharedItem(storedSharedItem) // 추가된 부분
+        const response = await axios.get("http://localhost:8080/getJsonData")
+
         setJsonData(response.data.fileInfo)
         console.log("jsonData:", response.data.fileInfo)
-        console.log("caches" in window)
-        console.log(window.caches)
-
-        // 클라이언트 측에서도 세션 스토리지에서 sharedItem 값을 가져와 사용
-        const storedSharedItem = sessionStorage.getItem("sharedItem")
-        if (storedSharedItem) {
-          setSharedItem(storedSharedItem)
-        }
-        console.log("item?:", storedSharedItem)
 
         // 동적으로 헤더 설정
         if (response.data.fileInfo.length > 0) {
@@ -148,7 +143,6 @@ const MyComponent = () => {
 
       // handleDownloadExcel 함수 호출 시 downloadUrl 값을 인자로 전달
       await handleDownloadExcel(response.data.downloadUrl)
-      console.log("zzzzzzzzzz", response.data.downloadUrl)
     } catch (error) {
       console.error("Error sending data:", error)
     }
@@ -161,7 +155,7 @@ const MyComponent = () => {
       const response = await axios({
         url: downloadUrl,
         method: "GET",
-        responseType: "blob", // Set the response type to 'blob' for file download
+        responseType: "blob",
       })
 
       const downloadLink = document.createElement("a")
@@ -214,12 +208,7 @@ const MyComponent = () => {
 
   return (
     <div>
-      <Header sharedItem={sharedItem} />
-      {/* <h1>Product List</h1> */}
-      {/* <button onClick={handleResetData}>Reset Data</button> */}
-      {/* <Button variant="outlined" color="neutral">
-        Outlined
-      </Button> */}
+      <Header storedSharedItem={sharedItem} />
 
       <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
         <Button variant="outlined" color="primary" onClick={handleDownloadData}>

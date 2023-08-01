@@ -42,12 +42,15 @@ async function launchServer() {
   app.post("/postSheetName", controller.postSheetName);
 
   // product-list/{item}에 json을 표로 출력
-  app.get("/getJson/", controller.getJson);
+  app.get("/getJsonData/", controller.getJson);
+  // app.post("/getJsonData/", controller.getJson);
 
   // product-list/{item} excel로 저장
   app.get("/downloadExcel", controller.downloadExcel);
 
   app.post("/postJson", controller.postJson);
+
+  app.post("/setSession", controller.setSession);
 
   const server = app.listen(8080, () => {
     const host = server.address().address;

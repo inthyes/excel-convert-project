@@ -8,6 +8,7 @@ const spreadsheetId = "10SSTLhZzmHEABvoe4Isy6L258tk4T7GN8YdylUawLB4";
 const fileDirectory = "./downloaded";
 const serverAddress = "http://localhost:8000";
 let sharedItem;
+let sharedItemValue = null;
 
 //* product-list페이지 시작과 동시에 get되는 함수
 async function getSheetList(req, res) {
@@ -32,9 +33,10 @@ function postSheetName(req, res) {
   console.log("Received item:", item);
 
   req.session.sharedItem = item; // 서버 측에서 세션을 설정
+  console.log("asdf", req.session.sharedItem);
   const processedItem = returnItemValue(item);
   sharedItem = item;
-  res.send({ item: processedItem });
+  res.send({ item: processedItem, sharedItem: req.session.sharedItem });
 }
 
 function returnItemValue(item) {
@@ -45,24 +47,38 @@ function returnItemValue(item) {
 // postSheetName의 item값을 returnItemValue함수를 통해 할당 받는다.
 async function getJson(req, res) {
   try {
-    console.log("Received item in getJson:", sharedItem);
+    console.log("sharedItemValue", sharedItemValue); // sharedItemValue 값 출력
+    // const x = req.session.sharedItem;
+    console.log("Received item in getJson:", req.session.sharedItem);
+
     const range = "A1:Z100";
     const sheetApiClient = await SheetApiClientFactory.create();
     const downloader = new SheetDownloader(sheetApiClient);
     const fileInfo = await downloader.downloadToJson(
       spreadsheetId,
-      sharedItem,
+      sharedItemValue, // 전역 변수 사용
       "downloaded/product_list.json"
     );
     const headerRow = downloader.getHeaderRow();
 
-    res.json({ fileInfo: fileInfo, sharedItem: sharedItem });
+    res.json({ fileInfo: fileInfo, sharedItem: sharedItemValue }); // 전역 변수 사용
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
   }
 }
 
+function setSession(req, res) {
+  try {
+    const { sharedItem } = req.body;
+    sharedItemValue = sharedItem; // 전역 변수에 값을 저장
+    console.log("Session value successfully set on server:", sharedItem);
+    res.json({ message: "Session value set on server" });
+  } catch (error) {
+    console.error("Error setting session value on server:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+}
 //* json을 excel로 변환하는 함수(downloadExcel을 통해 작동) - 사용 안 함
 function jsonToExcel(filePath) {
   const jsonData = fs.readFileSync(filePath, "utf-8");
@@ -126,4 +142,5 @@ module.exports = {
   getSheetList, // 추가: 시트 목록을 가져오는 함수
   jsonToExcel,
   postSheetName,
+  setSession,
 };
