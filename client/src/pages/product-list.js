@@ -1,51 +1,292 @@
 import React, { useEffect, useState } from "react"
 import axios from "axios"
-// import { Link } from "react-router-dom"
-// import { useItemContext } from "../itemContext"
+import { withStyles, makeStyles } from "@material-ui/core/styles"
+import Paper from "@material-ui/core/Paper"
+import Table from "@material-ui/core/Table"
+import TableBody from "@material-ui/core/TableBody"
+import TableCell from "@material-ui/core/TableCell"
+import TableContainer from "@material-ui/core/TableContainer"
+import TableHead from "@material-ui/core/TableHead"
+import TableRow from "@material-ui/core/TableRow"
+import Select from "@material-ui/core/Select"
+import MenuItem from "@material-ui/core/MenuItem"
+import IconButton from "@material-ui/core/IconButton"
+// import IconButton from "@material-ui/core/IconButton"
+import DeleteIcon from "@material-ui/icons/Delete"
+import Button from "@material-ui/core/Button"
+import Header from "../components/Header"
 
-function SheetList() {
-  const [sheetList, setSheetList] = useState([])
-  // const { setItem } = useItemContext()
+const StyledTableCell = withStyles(theme => ({
+  head: {
+    backgroundColor: theme.palette.grey[200],
+    color: theme.palette.common.white,
+    position: "relative",
+  },
+  body: {
+    fontSize: 14,
+  },
+}))(TableCell)
+
+const useStyles = makeStyles(theme => ({
+  table: {
+    minWidth: 700,
+  },
+  select: {
+    width: "100%",
+    color: "black",
+  },
+  deleteButton: {
+    position: "absolute",
+    top: "50%",
+    right: theme.spacing(-1),
+    transform: "translateY(-50%)",
+    visibility: "hidden",
+  },
+  headerCell: {
+    "&:hover $deleteButton": {
+      visibility: "visible",
+    },
+  },
+}))
+
+const MyComponent = () => {
+  const classes = useStyles()
+  const [jsonData, setJsonData] = useState(null)
+  const [sharedItem, setSharedItem] = useState(null) // sharedItem 상태 추가
+  const [selectedHeaders, setSelectedHeaders] = useState([])
+  const [originalHeaders, setOriginalHeaders] = useState([])
+  const [downloadUrl, setDownloadUrl] = useState("")
+
+  // const { item } = useItemContext()
+  // console.log("your item :", item)
+  // useEffect(() => {
+  //   const storedSharedItem = sessionStorage.getItem("sharedItem")
+  //   if (storedSharedItem) {
+  //     setSharedItem(JSON.parse(storedSharedItem))
+  //   }
+  // }, [])
 
   useEffect(() => {
-    axios
-      .get("http://localhost:8080/getSheetList")
-      .then(response => {
-        setSheetList(response.data)
-        console.log(response.data)
-      })
-      .catch(error => {
-        console.error("Error retrieving sheet list:", error)
-      })
-  }, [])
+    const fetchData = async () => {
+      try {
+        // templates/product-list.js에서 item 값을 사용할 수 있도록 전달
+        // console.log("item from context:", item);
+        const response = await axios.get("http://localhost:8080/getJson")
+        setJsonData(response.data.fileInfo)
+        console.log("jsonData:", response.data.fileInfo)
+        console.log("caches" in window)
+        console.log(window.caches)
 
-  const handleSheetList = async item => {
+        // 클라이언트 측에서도 세션 스토리지에서 sharedItem 값을 가져와 사용
+        const storedSharedItem = sessionStorage.getItem("sharedItem")
+        if (storedSharedItem) {
+          setSharedItem(storedSharedItem)
+        }
+        console.log("item?:", storedSharedItem)
+
+        // 동적으로 헤더 설정
+        if (response.data.fileInfo.length > 0) {
+          const headers = Object.keys(response.data.fileInfo[0]).filter(
+            header => header.trim() !== ""
+          )
+          setSelectedHeaders(headers)
+          setOriginalHeaders(headers)
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error)
+      }
+    }
+
+    fetchData()
+  }, []) // item 값이 변경될 때마다 useEffect가 호출되도록 변경
+
+  const handleHeaderChange = (e, index) => {
+    // e: 이벤트 객체, index: 수정하려는 헤더의 인덱스
+    const newHeaders = [...selectedHeaders]
+    newHeaders[index] = e.target.value // 헤더 변경
+    setSelectedHeaders(newHeaders) // selectedHeaders 배열 업데이트
+  }
+
+  const handleDeleteColumn = columnIndex => {
+    const updatedData = jsonData.map(item => {
+      const updatedItem = { ...item }
+      delete updatedItem[selectedHeaders[columnIndex]]
+      return updatedItem
+    })
+
+    const updatedHeaders = selectedHeaders.filter(
+      (_, index) => index !== columnIndex
+    )
+
+    const updatedOriginalHeaders = originalHeaders.filter(
+      (_, index) => index !== columnIndex
+    )
+
+    setJsonData(updatedData)
+    setSelectedHeaders(updatedHeaders) // selectedHeaders 배열 업데이트
+    setOriginalHeaders(updatedOriginalHeaders) // originalHeaders 배열 업데이트
+  }
+  const handleDownloadData = async () => {
+    // 셀렉트 박스로 변경된 헤더 이름을 반영한 JSON 데이터 생성
+    const updatedJsonData = jsonData.map(item => {
+      const updatedItem = {}
+      originalHeaders.forEach((header, index) => {
+        const selectedHeader = selectedHeaders[index]
+        updatedItem[selectedHeader] = item[header]
+      })
+      return updatedItem
+    })
+
     try {
-      console.log("asdfasdfaSDF", item)
-      const response = await axios.post("http://localhost:8080/postSheetName", {
-        item: item,
-      })
-      console.log("Sheet name sent successfully:", response.data)
+      const response = await axios.post(
+        "http://localhost:8080/postJson",
+        updatedJsonData
+      )
+      console.log("Data sent successfully:", response.data.downloadUrl)
+      // 서버로부터 받아온 다운로드 URL을 상태 변수에 설정
+      setDownloadUrl(response.data.downloadUrl)
 
-      // 서버로부터 값을 받은 후에 페이지를 이동시킵니다.
-      window.location.href = `/product-list/${item}`
+      // handleDownloadExcel 함수 호출 시 downloadUrl 값을 인자로 전달
+      await handleDownloadExcel(response.data.downloadUrl)
+      console.log("zzzzzzzzzz", response.data.downloadUrl)
     } catch (error) {
-      console.error("Error sending sheet name:", error)
+      console.error("Error sending data:", error)
     }
   }
 
+  // handleDownloadExcel 함수에서 downloadUrl 변수를 사용하도록 수정
+  const handleDownloadExcel = async downloadUrl => {
+    console.log("qqqqqqqq", downloadUrl)
+    try {
+      const response = await axios({
+        url: downloadUrl,
+        method: "GET",
+        responseType: "blob", // Set the response type to 'blob' for file download
+      })
+
+      const downloadLink = document.createElement("a")
+      downloadLink.href = URL.createObjectURL(new Blob([response.data]))
+      downloadLink.setAttribute("download", "excel_file.xlsx")
+      document.body.appendChild(downloadLink)
+      downloadLink.click()
+      document.body.removeChild(downloadLink)
+    } catch (error) {
+      console.error("Error downloading file:", error)
+    }
+  }
+
+  const handleAddColumn = () => {
+    const newHeader = `New Column ${selectedHeaders.length + 1}`
+
+    setSelectedHeaders(prevHeaders => [...prevHeaders, newHeader])
+    setOriginalHeaders(prevHeaders => [...prevHeaders, newHeader])
+
+    // 새로운 열을 추가한 후, jsonData에도 빈 값을 추가한다.
+    const updatedData = jsonData.map(item => {
+      const updatedItem = { ...item, [newHeader]: "" }
+      return updatedItem
+    })
+
+    setJsonData(updatedData)
+  }
+
+  const handleResetData = () => {
+    setJsonData(null)
+    setSelectedHeaders([])
+    setOriginalHeaders([])
+  }
+
+  const selectOptions = [
+    "",
+    "메뉴코드",
+    "메뉴명",
+    "가격",
+    "할인가격",
+    "포장추가비용",
+    "이미지명",
+    "메뉴 표시명(한글)",
+    "메뉴 표시명(영문)",
+    "메뉴 표시명(일문)",
+    "메뉴 표시명(중문)",
+    "메뉴 표시명(KDS)",
+    "메뉴 표시명(Print)",
+  ]
+
   return (
     <div>
-      <h1>Sheet List</h1>
-      <ul>
-        {sheetList.map((item, index) => (
-          <li key={index}>
-            <button onClick={() => handleSheetList(item)}>{item}</button>
-          </li>
-        ))}
-      </ul>
+      <Header sharedItem={sharedItem} />
+      {/* <h1>Product List</h1> */}
+      {/* <button onClick={handleResetData}>Reset Data</button> */}
+      {/* <Button variant="outlined" color="neutral">
+        Outlined
+      </Button> */}
+
+      <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
+        <Button variant="outlined" color="primary" onClick={handleDownloadData}>
+          Download Data
+        </Button>
+        <Button variant="outlined" color="primary" onClick={handleAddColumn}>
+          Add Column
+        </Button>
+      </div>
+      {/* {downloadUrl && (
+        <button onClick={handleDownloadExcel}>Download Excel</button>
+      )} */}
+      <br />
+      {jsonData ? (
+        <div>
+          <TableContainer component={Paper}>
+            <Table className={classes.table}>
+              <TableHead>
+                <TableRow>
+                  {originalHeaders.map((header, index) => (
+                    <StyledTableCell
+                      key={header}
+                      className={classes.headerCell}
+                    >
+                      <Select
+                        className={classes.select}
+                        value={selectedHeaders[index]}
+                        onChange={e => handleHeaderChange(e, index)}
+                      >
+                        <MenuItem value={header}>{header}</MenuItem>
+                        {selectOptions.map(option => (
+                          <MenuItem value={option} key={option}>
+                            {option}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      {header !== "" && (
+                        <IconButton
+                          className={classes.deleteButton}
+                          onClick={() => handleDeleteColumn(index)}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      )}
+                    </StyledTableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {jsonData.map((product, index) => (
+                  <TableRow key={index}>
+                    {originalHeaders.map(header => (
+                      <TableCell key={`${header}-${index}`} align="center">
+                        {product[header]}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </div>
+      ) : (
+        <div style={{ textAlign: "center", fontSize: "24px" }}>Loading...</div>
+      )}
     </div>
   )
 }
 
-export default SheetList
+export default MyComponent

@@ -11,8 +11,8 @@ exports.createPages = async ({ graphql, actions }) => {
     // Create dynamic pages for each item in the itemList
     itemList.forEach(item => {
       createPage({
-        path: `/product-list/${item}`,
-        component: require.resolve("./src/templates/product-list.js"),
+        path: `/sheet-list/${item}`,
+        component: require.resolve("./src/pages/product-list.js"),
         context: { item }, // Pass the item as a context to the template
       })
     })
@@ -20,3 +20,4 @@ exports.createPages = async ({ graphql, actions }) => {
     console.error("Error fetching item list:", error)
   }
 }
+;``
