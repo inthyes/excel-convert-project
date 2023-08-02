@@ -206,6 +206,15 @@ const MyComponent = () => {
     "메뉴 표시명(Print)",
   ]
 
+  // if (sharedItem !== sessionStorage.getItem("sharedItem")) {
+  //   return (
+  //     <div>
+  //       {/* <Header storedSharedItem={sharedItem} /> */}
+  //       <div style={{ textAlign: "center", fontSize: "24px" }}>Not Found</div>
+  //     </div>
+  //   )
+  // }
+
   return (
     <div>
       <Header storedSharedItem={sharedItem} />

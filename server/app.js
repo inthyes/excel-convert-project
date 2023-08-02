@@ -1,10 +1,11 @@
 const express = require("express");
 const cors = require("cors");
-const cookieParser = require("cookie-parser");
+// const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const bodyParser = require("body-parser");
-const controller = require("./controller/convert.controller");
 
+const controller = require("./controller/convert.controller");
+const routes = require("./routes");
 async function launchServer() {
   const app = express();
 
@@ -31,27 +32,10 @@ async function launchServer() {
 
   // app.use(express.static("downloaded"));
   app.use(bodyParser.json());
-  app.get("/", (req, res) => {
-    res.json({ message: "hello" });
-  });
-
-  // sheetList출력 및 선택
-  app.get("/getSheetList", controller.getSheetList);
-
-  // sheetList name을 불러온다.
-  app.post("/postSheetName", controller.postSheetName);
-
-  // product-list/{item}에 json을 표로 출력
-  app.get("/getJsonData/", controller.getJson);
-  // app.post("/getJsonData/", controller.getJson);
-
-  // product-list/{item} excel로 저장
-  app.get("/downloadExcel", controller.downloadExcel);
-
-  app.post("/postJson", controller.postJson);
-
-  app.post("/setSession", controller.setSession);
-
+  app.use(routes);
+  // app.get("/", (req, res) => {
+  //   res.json({ message: "hello" });
+  // });
   const server = app.listen(8080, () => {
     const host = server.address().address;
     const port = server.address().port;
