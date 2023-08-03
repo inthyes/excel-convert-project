@@ -4,7 +4,6 @@ const cors = require("cors");
 const session = require("express-session");
 const bodyParser = require("body-parser");
 
-const controller = require("./controller/convert.controller");
 const routes = require("./routes");
 async function launchServer() {
   const app = express();
