@@ -3,7 +3,7 @@ const fs = require("fs");
 const path = require("path");
 
 const fileDirectory = "./";
-const serverAddress = "http://localhost:8000";
+const serverAddress = "http://localhost:8080";
 // const dotenv = require("dotenv");
 // dotenv.config({ path: "../" });
 

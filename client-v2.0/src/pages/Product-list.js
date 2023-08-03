@@ -153,23 +153,18 @@ const ProductList = () => {
   };
 
   // handleDownloadExcel 함수에서 downloadUrl 변수를 사용하도록 수정
-  const handleDownloadExcel = async (downloadUrl) => {
-    console.log("qqqqqqqq", downloadUrl);
-    try {
-      const response = await axios({
-        url: downloadUrl,
-        method: "GET",
-        responseType: "blob",
-      });
+  const handleDownloadExcel = async () => {
+    const downloadLink = document.createElement("a");
+    console.log("downloadLink", downloadLink);
 
-      const downloadLink = document.createElement("a");
-      downloadLink.href = URL.createObjectURL(new Blob([response.data]));
+    // 다운로드 URL이 유효한 경우에만 다운로드 시도
+    if (downloadUrl) {
+      downloadLink.href = downloadUrl;
+      console.log("downloadLink.href", downloadLink.href);
       downloadLink.setAttribute("download", "excel_file.xlsx");
       document.body.appendChild(downloadLink);
       downloadLink.click();
       document.body.removeChild(downloadLink);
-    } catch (error) {
-      console.error("Error downloading file:", error);
     }
   };
 
