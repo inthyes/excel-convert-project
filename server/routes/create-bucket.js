@@ -1,7 +1,4 @@
 // const { uploadFile } = require("./UploadController");
-const accessKeyId = "AKIAQODXHTFXJPI6VXNU";
-const secretAccessKey = "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";
-
 const credentials = {
   accessKeyId: accessKeyId,
   secretAccessKey: secretAccessKey,

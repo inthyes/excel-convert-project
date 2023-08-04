@@ -11,7 +11,6 @@ import TableRow from "@material-ui/core/TableRow";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import IconButton from "@material-ui/core/IconButton";
-// import IconButton from "@material-ui/core/IconButton"
 import DeleteIcon from "@material-ui/icons/Delete";
 import Button from "@material-ui/core/Button";
 import ProductHeader from "../components/Product-Header";
@@ -205,15 +204,6 @@ const ProductList = () => {
     "메뉴 표시명(Print)",
   ];
 
-  // if (sharedItem !== sessionStorage.getItem("sharedItem")) {
-  //   return (
-  //     <div>
-  //       {/* <Header storedSharedItem={sharedItem} /> */}
-  //       <div style={{ textAlign: "center", fontSize: "24px" }}>Not Found</div>
-  //     </div>
-  //   )
-  // }
-
   return (
     <div>
       <ProductHeader storedSharedItem={sharedItem} />
@@ -225,9 +215,6 @@ const ProductList = () => {
           Add Column
         </Button>
       </div>
-      {/* {downloadUrl && (
-        <button onClick={handleDownloadExcel}>Download Excel</button>
-      )} */}
       <br />
       {jsonData ? (
         <div>

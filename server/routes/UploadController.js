@@ -6,6 +6,7 @@ const fileDirectory = path.join(__dirname, "../downloaded/");
 console.log("fileDirectory", fileDirectory);
 const serverAddress = "http://localhost:8080";
 const JsonAddress = "../downloaded/product_list.json";
+
 //* json을 excel로 변환하는 함수(downloadExcel을 통해 작동) - 사용 안 함
 function jsonToExcel(filePath) {
   const jsonData = fs.readFileSync(filePath, "utf-8");
@@ -56,7 +57,6 @@ async function downloadExcel(filePath, res) {
   res.json({
     downloadUrl: `${serverAddress}/downloaded/${ExcelName}`,
   });
-  // console.log(s3Url_1);
 }
 
 function getFile(req, res) {
