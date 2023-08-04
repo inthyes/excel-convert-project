@@ -30,7 +30,7 @@ const Home = () => {
               googleSheet to Excel
             </Button>
           </Link>
-          <Link to={`/sheet-list`}>
+          <Link to={`/ExcelUpload`}>
             <Button
               variant="link"
               style={{ ...buttonStyle, fontSize: "24px", marginTop: "16px" }}

@@ -1,7 +1,8 @@
 const router = require("express").Router();
-const SheetCtl = require("./SheetController");
-const UploadCtl = require("./UploadController");
-// const path = require("path");
+
+const SheetCtl = require("./googleSheetController");
+const FileCtl = require("./fileController");
+const ExcelCtl = require("./excelController");
 
 router.get("/getSheetList", SheetCtl.getSheetList);
 router.get("/getJsonData/", SheetCtl.getJson);
@@ -9,8 +10,10 @@ router.get("/getJsonData/", SheetCtl.getJson);
 router.post("/postSheetName", SheetCtl.postSheetName);
 router.post("/setSession", SheetCtl.setSession);
 
-router.get("/downloadExcel", UploadCtl.downloadExcel);
-router.post("/postJson", UploadCtl.postJson);
-router.get("/downloaded/json_to_excel.xlsx", UploadCtl.getFile);
+router.get("/downloadExcel", FileCtl.downloadExcel);
+router.post("/postJson", FileCtl.postJson);
+router.get("/downloaded/json_to_excel.xlsx", FileCtl.getFile);
+
+router.post("/aqw", ExcelCtl.excelToJson);
 
 module.exports = router;
