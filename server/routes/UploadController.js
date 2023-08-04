@@ -1,24 +1,11 @@
 const XLSX = require("xlsx");
 const fs = require("fs");
 const path = require("path");
-
-const fileDirectory = "./";
+let ExcelName;
+const fileDirectory = path.join(__dirname, "../downloaded/");
+console.log("fileDirectory", fileDirectory);
 const serverAddress = "http://localhost:8080";
-// const dotenv = require("dotenv");
-// dotenv.config({ path: "../" });
-
-// const accessKeyId = "AKIAQODXHTFXJPI6VXNU";
-// const secretAccessKey = "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";
-
-// const credentials = {
-//   accessKeyId: accessKeyId,
-//   secretAccessKey: secretAccessKey,
-// };
-// console.log(process.env.AccessKeyId);
-// const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
-// const s3Client = new S3Client({ region: "ap-northeast-2", credentials });
-// const { uploadFile } = require("./create-bucket");
-
+const JsonAddress = "../downloaded/product_list.json";
 //* json을 excel로 변환하는 함수(downloadExcel을 통해 작동) - 사용 안 함
 function jsonToExcel(filePath) {
   const jsonData = fs.readFileSync(filePath, "utf-8");
@@ -33,7 +20,7 @@ function jsonToExcel(filePath) {
 
 //* json server에 저장.
 async function postJson(req, res) {
-  const filePath = path.join(__dirname, "../downloaded/product_list.json");
+  const filePath = path.join(__dirname, JsonAddress);
   const jsonData = req.body;
   console.log("내가먼저");
 
@@ -53,12 +40,9 @@ async function downloadExcel(filePath, res) {
   console.log(workbook);
   XLSX.utils.book_append_sheet(workbook, worksheet, "my_sheet");
 
-  const excelFileName = `json_to_excel.xlsx`;
-  const excelFilePath = path.join(
-    __dirname,
-    "../downloaded/json_to_excel.xlsx"
-  );
-  console.log("excelFilePath", excelFilePath);
+  ExcelName = `json_to_excel.xlsx`;
+  const excelFilePath = path.join(fileDirectory, ExcelName);
+  console.log("fileDirectory", excelFilePath);
 
   const file = XLSX.writeFile(workbook, excelFilePath);
   console.log("aaaaaaaaa", file);
@@ -70,19 +54,19 @@ async function downloadExcel(filePath, res) {
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
   );
   res.json({
-    downloadUrl: `${serverAddress}/downloaded/${excelFileName}`,
+    downloadUrl: `${serverAddress}/downloaded/${ExcelName}`,
   });
   // console.log(s3Url_1);
 }
 
-// function getFile(req, res) {
-//   const filePath = path.join(__dirname, "../downloaded/json_to_excel.xlsx");
-//   res.sendFile(filePath);
-// }
+function getFile(req, res) {
+  const filePath = path.join(__dirname, "../downloaded/json_to_excel.xlsx");
+  res.sendFile(filePath);
+}
 
 module.exports = {
   postJson,
   downloadExcel,
   jsonToExcel,
-  // uploadFile, // 추가: 파일 업로드 함수
+  getFile,
 };
