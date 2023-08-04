@@ -14,6 +14,6 @@ router.get("/downloadExcel", FileCtl.downloadExcel);
 router.post("/postJson", FileCtl.postJson);
 router.get("/downloaded/json_to_excel.xlsx", FileCtl.getFile);
 
-router.post("/aqw", ExcelCtl.excelToJson);
+router.post("/excelToJson", ExcelCtl.excelToJson);
 
 module.exports = router;

@@ -1,7 +1,11 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
-import ProductList from "./ExcelProductList";
+import SheetHeader from "../components/Sheet-Header";
+import SendIcon from "@mui/icons-material/Send";
+// import Stack from "@mui/material/Stack";
+import Button from "@material-ui/core/Button";
+import test from "../test.css";
 
 const UploadExcel = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -17,7 +21,7 @@ const UploadExcel = () => {
     formData.append("xlsx", selectedFile);
 
     axios
-      .post("http://localhost:8080/aqw", formData, {
+      .post("http://localhost:8080/excelToJson", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -25,10 +29,15 @@ const UploadExcel = () => {
       .then((response) => {
         console.log(response.data);
         setResData(response.data.resData); // Update the resData state with the response data
-        // Call navigate to move to the target path and pass resData as a state object
-        navigate("/ExcelUpload/ExcelProductList", {
-          state: { resData: response.data.resData },
-        });
+
+        // Combine the file name and resData into an object
+        const dataWithFileName = {
+          fileName: selectedFile.name, // Add the file name to the object
+          resData: response.data.resData,
+        };
+
+        // Call navigate to move to the target path and pass the combined object as a state
+        navigate("/ExcelUpload/ExcelProductList", { state: dataWithFileName });
       })
       .catch((error) => {
         console.error("Error uploading file:", error);
@@ -37,9 +46,22 @@ const UploadExcel = () => {
 
   return (
     <div>
-      <h1>Excel File Uploader</h1>
-      <input type="file" onChange={onFileChange} />
-      <button onClick={onFileUpload}>Upload</button>{" "}
+      <SheetHeader />
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <input type="file" onChange={onFileChange} />
+        {/* <div class="filebox">
+          <input class="upload-name" value="첨부파일" placeholder="첨부파일" />
+          <label for="file">파일찾기</label>
+          <input type="file" id="file" />
+        </div> */}
+        <Button
+          variant="contained"
+          onClick={onFileUpload}
+          endIcon={<SendIcon />}
+        >
+          Upload
+        </Button>
+      </div>
       {/* Use button instead of Link */}
     </div>
   );

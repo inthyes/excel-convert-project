@@ -11,16 +11,26 @@ const HeaderCss = css`
 `;
 
 const ProductHeader = React.memo((props) => {
-  const item = props.storedSharedItem;
-  console.log(item);
+  const { storedSharedItem, customHeaderText } = props; // Destructure the props
+  console.log(storedSharedItem);
 
   return (
     <div css={HeaderCss} className="mb-3">
       <Row>
         <Col md="6" sm="auto" className="text-center m-auto">
           <br />
-          <h2>메뉴 리스트 [매장명 : {item}]</h2>
-          <p>googleSheet to excelFile</p>
+          {/* Use conditional rendering to show different text */}
+          {storedSharedItem ? (
+            <div>
+              <h2>메뉴 리스트 [매장명 : {storedSharedItem}]</h2>
+              <p>googleSheet to excelFile</p>
+            </div>
+          ) : (
+            <div>
+              <h2>{customHeaderText}</h2>
+              <p>excelFile to admin</p>
+            </div>
+          )}
         </Col>
       </Row>
     </div>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { DragDropContext, Draggable, Droppable } from "react-beautiful-dnd";
 import axios from "axios";
 import { withStyles, makeStyles } from "@material-ui/core/styles";
 import Paper from "@material-ui/core/Paper";
@@ -13,9 +14,8 @@ import MenuItem from "@material-ui/core/MenuItem";
 import IconButton from "@material-ui/core/IconButton";
 import DeleteIcon from "@material-ui/icons/Delete";
 import Button from "@material-ui/core/Button";
-// import ProductHeader from "../components/Product-Header";
-import { useParams, useLocation } from "react-router-dom";
-
+import ProductHeader from "../components/Product-Header";
+import { useLocation } from "react-router-dom";
 const StyledTableCell = withStyles((theme) => ({
   head: {
     backgroundColor: theme.palette.grey[200],
@@ -59,9 +59,11 @@ const ProductList = () => {
   const location = useLocation(); // Get the location object
 
   useEffect(() => {
-    // Check if location.state exists and has resData
-    if (location.state && location.state.resData) {
-      console.log("resData:", location.state.resData);
+    // Check if location.state exists and has the combined object
+    if (location.state && location.state.fileName && location.state.resData) {
+      const { fileName, resData } = location.state;
+      console.log("File Name:", fileName);
+      console.log("Res Data:", resData);
       // Assuming my_sheet is the first sheet in the resData object
       const firstSheet = location.state.resData.my_sheet;
       setJsonData(firstSheet); // jsonData should be an array, not the entire object
@@ -77,11 +79,38 @@ const ProductList = () => {
       setJsonData(null); // Set jsonData to null if resData is not available
     }
   }, [location.state]);
+
   const handleHeaderChange = (e, index) => {
-    // e: 이벤트 객체, index: 수정하려는 헤더의 인덱스
     const newHeaders = [...selectedHeaders];
-    newHeaders[index] = e.target.value; // 헤더 변경
-    setSelectedHeaders(newHeaders); // selectedHeaders 배열 업데이트
+    const newHeader = e.target.value;
+
+    // 열의 이름이 변경될 때, 해당 열의 데이터도 유지하도록 처리
+    const updatedData = jsonData.map((item) => {
+      const updatedItem = { ...item };
+      updatedItem[newHeader] = updatedItem[selectedHeaders[index]];
+      delete updatedItem[selectedHeaders[index]];
+      return updatedItem;
+    });
+
+    // 중복된 값이 이미 존재하는지 확인
+    const isDuplicate = newHeaders.some(
+      (header, i) => header === newHeader && i !== index
+    );
+
+    if (isDuplicate) {
+      // 중복된 값이 존재하면 알림 창을 띄움
+      const confirmResponse = window.confirm(
+        `이미 "${newHeader}" 열에 대한 헤더가 존재합니다. 그래도 변경하시겠습니까?`
+      );
+
+      if (!confirmResponse) {
+        return;
+      }
+    }
+
+    newHeaders[index] = newHeader;
+    setSelectedHeaders(newHeaders);
+    setJsonData(updatedData);
   };
 
   const handleDeleteColumn = (columnIndex) => {
@@ -184,66 +213,102 @@ const ProductList = () => {
     "메뉴 표시명(Print)",
   ];
 
+  const handleDragEnd = (result) => {
+    if (!result.destination) {
+      return;
+    }
+
+    const newHeaders = Array.from(selectedHeaders);
+    const [reorderedHeader] = newHeaders.splice(result.source.index, 1);
+    newHeaders.splice(result.destination.index, 0, reorderedHeader);
+
+    setSelectedHeaders(newHeaders);
+  };
+
+  // onClick={handleDownloadData}
   return (
     <div>
-      {/* <ProductHeader storedSharedItem={sharedItem} /> */}
+      <ProductHeader customHeaderText={location.state.fileName} />
       <div style={{ display: "flex", justifyContent: "center", gap: "10px" }}>
-        <Button variant="outlined" color="primary" onClick={handleDownloadData}>
-          Download Data
+        <Button variant="outlined" color="primary">
+          upload To Admin
         </Button>
-        <Button variant="outlined" color="primary" onClick={handleAddColumn}>
+        <Button variant="outlined" color="primary">
           Add Column
         </Button>
       </div>
       <br />
       {jsonData ? (
         <div>
-          <TableContainer component={Paper}>
-            <Table className={classes.table}>
-              <TableHead>
-                <TableRow>
-                  {originalHeaders.map((header, index) => (
-                    <StyledTableCell
-                      key={header}
-                      className={classes.headerCell}
-                    >
-                      <Select
-                        className={classes.select}
-                        value={selectedHeaders[index]}
-                        onChange={(e) => handleHeaderChange(e, index)}
-                      >
-                        <MenuItem value={header}>{header}</MenuItem>
-                        {selectOptions.map((option) => (
-                          <MenuItem value={option} key={option}>
-                            {option}
-                          </MenuItem>
+          <DragDropContext onDragEnd={handleDragEnd}>
+            <Droppable droppableId="headers" direction="horizontal">
+              {(provided) => (
+                <TableContainer
+                  component={Paper}
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                >
+                  <Table className={classes.table}>
+                    <TableHead>
+                      <TableRow>
+                        {selectedHeaders.map((header, index) => (
+                          <Draggable
+                            key={header}
+                            draggableId={header}
+                            index={index}
+                          >
+                            {(provided) => (
+                              <StyledTableCell
+                                className={classes.headerCell}
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                              >
+                                <Select
+                                  className={classes.select}
+                                  value={selectedHeaders[index]}
+                                  onChange={(e) => handleHeaderChange(e, index)}
+                                >
+                                  <MenuItem value={header}>{header}</MenuItem>
+                                  {selectOptions.map((option) => (
+                                    <MenuItem value={option} key={option}>
+                                      {option}
+                                    </MenuItem>
+                                  ))}
+                                </Select>
+                                {header !== "" && (
+                                  <IconButton
+                                    className={classes.deleteButton}
+                                    onClick={() => handleDeleteColumn(index)}
+                                  >
+                                    <DeleteIcon />
+                                  </IconButton>
+                                )}
+                              </StyledTableCell>
+                            )}
+                          </Draggable>
                         ))}
-                      </Select>
-                      {header !== "" && (
-                        <IconButton
-                          className={classes.deleteButton}
-                          onClick={() => handleDeleteColumn(index)}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      )}
-                    </StyledTableCell>
-                  ))}
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {jsonData.map((product, index) => (
-                  <TableRow key={index}>
-                    {originalHeaders.map((header) => (
-                      <TableCell key={`${header}-${index}`} align="center">
-                        {product[header]}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {jsonData.map((product, index) => (
+                        <TableRow key={index}>
+                          {selectedHeaders.map((header) => (
+                            <TableCell
+                              key={`${header}-${index}`}
+                              align="center"
+                            >
+                              {product[header]}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              )}
+            </Droppable>
+          </DragDropContext>
         </div>
       ) : (
         <div style={{ textAlign: "center", fontSize: "24px" }}>Loading...</div>
@@ -251,5 +316,4 @@ const ProductList = () => {
     </div>
   );
 };
-
 export default ProductList;
