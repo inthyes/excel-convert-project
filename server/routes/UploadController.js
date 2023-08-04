@@ -54,8 +54,11 @@ async function downloadExcel(filePath, res) {
   XLSX.utils.book_append_sheet(workbook, worksheet, "my_sheet");
 
   const excelFileName = `json_to_excel.xlsx`;
-  const excelFilePath = path.join(fileDirectory, excelFileName);
-  // console.log("fileDirectory", fileDirectory);
+  const excelFilePath = path.join(
+    __dirname,
+    "../downloaded/json_to_excel.xlsx"
+  );
+  console.log("excelFilePath", excelFilePath);
 
   const file = XLSX.writeFile(workbook, excelFilePath);
   console.log("aaaaaaaaa", file);
@@ -71,6 +74,11 @@ async function downloadExcel(filePath, res) {
   });
   // console.log(s3Url_1);
 }
+
+// function getFile(req, res) {
+//   const filePath = path.join(__dirname, "../downloaded/json_to_excel.xlsx");
+//   res.sendFile(filePath);
+// }
 
 module.exports = {
   postJson,

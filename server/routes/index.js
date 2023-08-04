@@ -18,4 +18,6 @@ router.get("/downloaded/json_to_excel.xlsx", (req, res) => {
   res.sendFile(filePath);
 });
 
+// router.get("/downloaded/json_to_excel.xlsx", UploadCtl.getFile);
+
 module.exports = router;
