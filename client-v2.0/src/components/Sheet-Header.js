@@ -12,9 +12,7 @@ const HeaderCss = css`
 `;
 
 const SheetHeader = (props) => {
-  // MyComponent에서 전달받은 jsonData의 item 값을 사용합니다
-  // const item = props.sharedItem
-  // console.log(item)
+  // MyComponent에서 전달받은 jsonData의 item 값을 사용한다
   const { googlesheet } = props;
   return (
     <div css={HeaderCss} className="mb-3">
@@ -27,8 +25,6 @@ const SheetHeader = (props) => {
           ) : (
             <h2>Excel File Uploader</h2>
           )}
-
-          {/* <p>googleSheet to excelFile</p> */}
           <br />
         </Col>
       </Row>
